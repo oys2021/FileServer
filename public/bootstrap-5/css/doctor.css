@@ -1,0 +1,11 @@
+header .navbar{
+    border-bottom: 4px solid darkslategrey;
+}
+header .navbar .nav-link{
+    color: darkslategrey;
+    font-weight: 600;
+}
+
+section .card{
+    background: darkslategrey;
+}

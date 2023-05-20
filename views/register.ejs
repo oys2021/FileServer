@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Server | SignUp</title>
+    <link rel="stylesheet" href="/bootstrap-5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/bootstrap-5/css/styles.css">
+    <style>
+        .success-message {
+          background-color: #dff0d8;
+          color: #3c763d;
+          padding: 10px;
+          border-radius: 4px;
+        }
+        
+        .error-message {
+          background-color: #f2dede;
+          color: #a94442;
+          padding: 10px;
+          border-radius: 4px;
+        }
+      </style>
+</head>
+<body>
+    <div class="container text-center mt-5">
+        <a href="/"><img src="img/logo.png" alt=""></a>
+        <div class="row">
+            <div class="col-md-3"></div>
+            <div class="col-md-6 mt-4">
+                <div class="card register">
+                    <div class="card-header text-white">
+                        <h4>Register</h4>
+                    </div>
+                    <div class="card-body">
+                        <%- include('./partials/messages.ejs') %> 
+                        <form id="myForm" action="/users/signup" method="POST">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <input type="email" name="email" class="form-control" placeholder="Email e.g: name@gmail.com" required>
+                                    </div><br>
+                                </div>                                
+                                                          
+                            </div><br>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <input type="password" name="password" class="form-control" placeholder=" Password" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <input type="password" name="password1" class="form-control" placeholder="Confirm Password" required>
+                                    </div>
+                                </div>
+                            </div><br>
+                            <button type="submit" class="btn btn-block btn1">Register</button>
+                            <p class="text-center mt-3">Already have an Account? <a href="/users/login">Log-In</a></p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3"></div>
+        </div>
+    </div>
+    
+
+    <script src="/bootstrap-5/js/Jquery.js"></script>
+    <script src="/bootstrap-5/js/bootstrap.min.js"></script>    
+</body>
+</html>

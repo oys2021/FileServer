@@ -1,0 +1,82 @@
+header{
+    background: whitesmoke;
+    border-bottom: 5px solid #3E5DFF;
+}
+header .navbar .nav-item .nav-link{
+    color: #3E5DFF;
+    font-weight: 600;
+}
+header .navbar-brand{
+    font-size:  25pt;
+    font-weight: 600;
+    margin-right: 30px;    
+}
+.showcase{
+    background: url('../../img/pexels-chokniti-khongchum-3938023.jpg');
+    background-size: cover;
+    height: 550px;
+    font-weight: 600;
+    line-height: 35px;
+    border-bottom: 5px solid #3E5DFF;
+}
+.showcase .btn1{
+    background-color: #3E5DFF;
+    color: whitesmoke;
+}
+.showcase .btn2{
+    background-color: whitesmoke;
+    border: 1px solid #3E5DFF;
+    color: #3E5DFF;
+}
+.showcase h1{
+    text-shadow: 2px 2px whitesmoke;
+}
+.showcase .btn2:hover{
+    background-color: #3E5DFF;
+    color: whitesmoke;
+    transition: 0.9s;
+}
+.services .card{
+    background: #3E5DFF;
+}
+
+
+/* Register Page */
+.register{
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+.register .btn1{
+    background-color: #3E5DFF;
+    color: whitesmoke;
+}
+.register a{
+    text-decoration:none;
+    color: #3E5DFF;
+    font-weight: 600;
+}
+.register .card-header{
+    background: #3E5DFF;
+}
+/* Register Page */
+
+
+.mockup{
+    background: whitesmoke;
+}
+
+footer{
+    background: whitesmoke;
+    padding: 20px;
+    border-top: 15px solid #3E5DFF;
+}
+footer .row{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+footer a{
+    text-decoration: none;
+    color: #3E5DFF;
+    font-weight: 600;
+    font-size: 10pt;
+}

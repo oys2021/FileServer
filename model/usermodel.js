@@ -16,12 +16,7 @@ resetToken :{
 }
 
 })
-const refreshTokens=[];
-UserSchema.methods.generateAuthToken = function () {
-	const token = jwt.sign({ _id: this._id }, process.env.JWTPRIVATEKEY, {
-	});
-	return token;
-};
+
 var User=mongoose.model('user',UserSchema)
 module.exports=User
 
