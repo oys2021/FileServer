@@ -16,6 +16,7 @@ resetToken :{
 }
 
 })
+const refreshTokens=[];
 
 var User=mongoose.model('user',UserSchema)
 module.exports=User

@@ -4,6 +4,9 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var mongoose=require('mongoose')
+const flash = require('connect-flash');
+const session = require('express-session');
+const nodemailer = require('nodemailer');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -34,6 +37,35 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
+//Express Session
+app.use(session({
+  secret: "secret",
+  resave: true,
+  saveUninitialized: true
+}));
+
+// connect to flash
+//Connect Flash
+app.use(flash())
+//Global Variable
+app.use((req, res, next)=>{
+  res.locals.success_msg = req.flash('success_msg')
+  res.locals.error_msg = req.flash('error_msg')
+  res.locals.error = req.flash('error')
+  next()
+});
+// Set up Nodemailer transporter
+const transporter = nodemailer.createTransport({
+  service: 'Gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,
+  },
+  tls: {
+    rejectUnauthorized: false
+  }
+  
+});
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
