@@ -11,7 +11,7 @@ var FileSchema=new Schema({
   uploadDate: { type: Date, default: Date.now },
   downloadCount: { type: Number, default: 0 },
   emailCount: { type: Number, default: 0 },
-  ownerID: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
-
 });
 
+const FileModel = mongoose.model('File', FileSchema);
+module.exports=FileModel
