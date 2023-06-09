@@ -1,0 +1,136 @@
+<%- include('./partials/header.ejs') %>
+    <section class="container-fluid mt-4">      
+      
+          <!-- Button trigger modal -->
+        <button type="button" class="btn btn-primary mb-3" style="margin-left: 7rem;" data-toggle="modal" data-target="#modelId">
+          Add File
+        </button>
+
+      <div class="row">        
+          <div class="col-md-1"></div>
+          <div class="col-md-9">
+
+              <div class="table-responsive shadow">
+                  <table class="table table-striped">
+                      <tr>
+                          <th>File Title</th>
+                          <th>Description </th>
+                          <th>Edit</th>
+                          <th>Delete</th>
+                      </tr>
+                      
+                 
+                          <tr>
+                              <td>title </td>
+                              <td>description</td>
+                              <td>
+                                <a href="#"><button class="btn btn-info btn-sm" data-toggle="modal" data-target="#modelId1"><img src="\img\icons8_Edit_Production_Order_16.png" alt="" class="img-fluid">Edit</button></a>  
+                            
+                              </td>
+                              <td>
+                                <form action="/admin/delete/" method="POST">
+                                  <button type="submit" class="btn btn-danger btn-sm"><img src="\img\icons8_trash_16.png" alt="" class="img-fluid">Delete</button>
+                                </form>
+                              </td>
+                          </tr>
+                      
+                        <!-- <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                          <strong>No Doctors Available Yet :)</strong> 
+                        </div> -->
+                  </table>
+              </div>
+          </div>
+          <div class="col-md-1"></div>
+      </div>      
+  </section>
+
+    
+  <!-- Modal -->
+  <div class="modal fade" id="modelId" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+              <h5 class="modal-title">Add File</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        <div class="modal-body">
+          <div class="row">
+            <form action="/admin/upload" method="POST" enctype="multipart/form-data">
+              <div class="form-group">
+                <label for="Firstname">Title</label>
+                <input type="text" class="form-control" name="title" placeholder="Title" required>
+              </div><br>                    
+              <div class="form-group">
+                <label for="Lastname">Description</label>
+                <input type="text" class="form-control" name="description" placeholder="Description" required>
+              </div>  <br>                                          
+       
+                <div class="col-12 mb-3">
+                  <div class="form-group">
+                    <label for="file">File</label>
+                    <input type="file" name="file" id="" class="form-control">
+                  </div>
+                </div>
+                
+                </div>
+              </div>
+              <button type="submit" class="btn btn-block btn-primary">Create</button>
+            </form>
+        </div>      
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="modelId1" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+              <h5 class="modal-title">Edit File</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        <div class="modal-body">
+          <div class="row">
+            <form action="/admin/addDoctor" method="POST" enctype="multipart/form-data">
+              <div class="form-group">
+                <label for="Firstname">Title</label>
+                <input type="text" class="form-control" name="Firstname" placeholder="Firstname" required>
+              </div><br>                    
+              <div class="form-group">
+                <label for="Lastname">Description</label>
+                <input type="text" class="form-control" name="Lastname" placeholder="Lastname" required>
+              </div>  <br>                                          
+                                   
+                <div class="col-12 mb-3">
+                  <div class="form-group">
+                    <label for="profile">File</label>
+                    <input type="file" name="image" id="" class="form-control">
+                  </div>
+                </div>
+                
+                </div>
+              </div>
+              <button type="submit" class="btn btn-block btn-primary">Edit</button>
+            </form>
+        </div>      
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+  
+  </script>
+
+    <script src="/bootstrap-5/js/Jquery.js"></script>
+    <script src="/bootstrap-5/js/bootstrap.min.js"></script>
+</body>
+</html>
