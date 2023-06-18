@@ -73,6 +73,53 @@ router.get('/searchResults/:title', async (req, res) => {
   }
 });
 
+async function getFilePathFromDatabase(fileId) {
+  try {
+    const file = await FileModel.findById(fileId);
+    if (!file) {
+      return null; // File not found
+    }
+    return file.filePath;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
+// Route to download a file by ID
+router.get('/download/:fileId', async(req, res) => {
+  const fileId = req.params.fileId;
+
+  // Retrieve file metadata from the database based on the fileId
+  FileModel.findById(fileId)
+    .then((file) => {
+      if (!file) {
+        return res.status(404).json({ error: 'File not found' });
+      }
+
+      const filePath = `uploads/${file.fileName}`;
+
+      // Increment the download count in your database
+      file.downloadCount += 1;
+      file.save();
+
+      // Set the appropriate content-disposition header to trigger a download
+      res.setHeader('Content-Disposition', `attachment; filename=${file.fileName}`);
+
+      // Read the file using fs.createReadStream
+      const fileStream = fs.createReadStream(filePath);
+
+      // Pipe the file stream to the response
+      fileStream.pipe(res);
+    })
+    .catch((error) => {
+      console.error('Error retrieving file:', error);
+      res.status(500).json({ error: 'Failed to retrieve file' });
+    });
+});
+
+
+
 
 
 

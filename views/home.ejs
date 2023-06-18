@@ -145,7 +145,7 @@
                               <p><%= file.description%></p>
                               <p><%= file.fileType%></p>
                               <div class="file-icons">
-                                  <a href="#"><i class="fas fa-download"></i></a>
+                                <a href="/download/<%= file._id%>"><i class="fas fa-download"></i></a>
                                   <a href="/preview/<%= file._id%>/"><i class="fas fa-eye"></i></a>
                                    <a href="/send-email/<%= file._id%>"><i class="fas fa-envelope"></i></a>
                                   
@@ -229,6 +229,32 @@
    
   </script>
   
+  <!-- <script>
+    function downloadFile(fileId) {
+      fetch(`/download/${fileId}`)
+        .then(response => {
+          if (response.ok) {
+            return response.blob();
+          }
+          throw new Error('Error downloading the file.');
+        })
+        .then(blob => {
+          // Create a temporary URL for the downloaded file
+          const url = window.URL.createObjectURL(blob);
+          // Create a temporary <a> element to trigger the file download
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'file_name.extension'; // Set the desired filename
+          a.click();
+          // Clean up the temporary URL
+          window.URL.revokeObjectURL(url);
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    }
+    
+  </script> -->
   
               
         <!-- Bootstrap JS -->
