@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Admin</title>
+    <link rel="stylesheet" href="/bootstrap-5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/bootstrap-5/css/admin.css">
+</head>
+<body>
+  <section class="container-fluid mt-4">     
+      
+          <!-- Button trigger modal -->
+        
+ 
+                  <div class="row">
+                    <form action="/send-email/<%= file._id %>" method="POST" enctype="multipart/form-data">
+                      <div class="form-group">
+                        <label for="Senders">Sender</label>
+                        <input type="text" name="senderEmail" class="form-control" name="" placeholder="Sender" required>
+                      </div><br>                    
+                      <div class="form-group">
+                        <label for="Receiver">Receiver</label>
+                        <input type="text" class="form-control" name="receiverEmail" placeholder="Receiver" required>
+                      </div>
+                        </div>
+                      </div>
+                      <button type="submit" class="btn btn-block btn-primary">Create</button>
+                    </form>
+                </div>      
+                </div>
+              </div>
+            </div>
+          
+          
+ 
+  
+  <script>
+  
+  </script>
+
+    <script src="/bootstrap-5/js/Jquery.js"></script>
+    <script src="/bootstrap-5/js/bootstrap.min.js"></script>
+</body>
+</html>

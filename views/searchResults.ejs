@@ -118,27 +118,10 @@
     <div class="container">
         <div class="row">
             <div class="col-md-8 offset-md-2">
-              <!-- <div class="search-bar">
-                <div class="input-group">
-                  <input type="text" class="form-control" placeholder="Search"  name="key" onkeyup="sendData(this)">
-                </div>
-              </div> -->
-             <h1>Live Search</h1>
-              <form action="/submit" method="post" class="d-flex">
-                <input class="form-control me-2" type="search" name="search_box" placeholder="Search" id="search-box" onkeyup="sendData(this)" aria-label="Search">
-                <button id="submitButton"  type="submit">Search</button>
-              </form>
-              <section id="searchresults">
-             
-              </section>
-              
-              
-
               <ul id="searchResults"></ul>
-                <h1 class="text-center mt-5 mb-3">File Download Feed</h1>
-                <% if (files.length > 0) { %>
+                <h1 class="text-center mt-5 mb-3"><%= file.title %></h1>
                   <ul>
-                    <% files.forEach((file) => { %>
+                   
                             
                             <div class="file">
                               <h5 class="mb-1"><%= file.title %></h5>
@@ -151,11 +134,9 @@
                                   
                               </div>
                           </div>
-                    <% }); %>
+                
                   </ul>
-                <% } else { %>
-                  <p>No files found.</p>
-                <% } %>
+                  
               </div>
 
                <!-- Modal -->
@@ -189,46 +170,7 @@
     </div>
   </div>
 
-  <script>
-    let selectedResult = null;
-    const searchInput = document.getElementById('search-box');
-    const submitButton = document.getElementById('submitButton');
-  
-    function sendData(e) {
-      const searchresults = document.getElementById('searchresults');
-      fetch('getFiles', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ payload: e.value })
-      })
-        .then(res => res.json())
-        .then(data => {
-          let payload = data.payload;
-          searchresults.innerHTML = '';
-          if (payload.length < 1) {
-            searchresults.innerHTML = '<p>Sorry, nothing found</p>';
-            return;
-          }
-          payload.forEach((item, index) => {
-            if (index > 0) searchresults.innerHTML += '<hr>';
-            searchresults.innerHTML += `<p class="search-result-item" onclick="selectResult(event)" data-file-id="${item._id}">${item.title}</p>`;
-      
-            ;
-          });
-        });
-      return;
-    }
-  
-    function selectResult(event) {
-      const clickedResult = event.target.textContent;
-      selectedResult = clickedResult;
-      searchInput.value = clickedResult;
-      searchResults.innerHTML = '';
-    }
-    
    
-  </script>
-  
   
               
         <!-- Bootstrap JS -->
