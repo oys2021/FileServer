@@ -3,6 +3,7 @@ var router = express.Router();
 var jwt=require('jsonwebtoken')
 const multer = require('multer');
 var FileModel=require('../model/filemodel')
+
 /* GET home page. */
 
 // Set up multer storage
@@ -23,7 +24,7 @@ router.get('/main', async function(req, res, next) {
   try {
     const files = await FileModel.find(); // Retrieve all documents from the FileModel collection
 
-    res.render('admin/dashboard', { files }); // Pass the files data to the template
+    res.render('admin/fileReview', { files }); // Pass the files data to the template
   } catch (error) {
     next(error);
   }

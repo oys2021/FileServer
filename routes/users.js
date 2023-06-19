@@ -89,7 +89,7 @@ const newuser= await new User({ ...req.body, password:hashPassword, resetToken:t
   res.cookie('token', token, { httpOnly: true });
   
  // Render the registration success page
- return res.status(200).json({ message: 'User successfully created' });
+ return res.redirect(`../home`);
 });
 
 router.post("/login", async (req, res) => {
@@ -125,7 +125,7 @@ router.post("/login", async (req, res) => {
     // Set the token as a cookie
     res.cookie("token", token, { httpOnly: true });
 
-    return res.status(200).json({ message: 'Successful login' });
+    return  res.redirect(`../home`);
   } catch (error) {
     console.log(error);
     return res.status(500).send("Internal server error");

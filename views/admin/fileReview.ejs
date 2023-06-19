@@ -1,0 +1,36 @@
+<%- include('./partials/header.ejs') %>     
+
+
+    <section class="container mt-4 text-white text-center">
+        <div class="row">
+          <div class="col-md-12">
+            <table class="table">
+              <thead>
+                <tr class="table-dark">
+            
+                  <th scope="col">Filename</th>
+                  <th scope="col">No of email sent</th>
+                  <th scope="col">No of downloads</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% files.forEach(function(file) { %>
+                  <tr>
+                    <td><%= file.title %></td>
+                    <td><%= file.emailCount %></td>
+                    <td><%= file.downloadCount %></td>
+                  </tr>
+                <% }); %>
+                
+              </tbody>
+            </table>
+            </div>
+          </div>
+      </section>
+
+
+
+  </body>
+  <script src="\bootstrap-5\js\Jquery.js"></script>
+  <script src="\bootstrap-5\js\bootstrap.min.js"></script>
+  </html>
