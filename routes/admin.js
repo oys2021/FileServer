@@ -19,8 +19,14 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 
-router.get('/main',function(req, res, next) {
-  res.render('admin/dashboard');
+router.get('/main', async function(req, res, next) {
+  try {
+    const files = await FileModel.find(); // Retrieve all documents from the FileModel collection
+
+    res.render('admin/dashboard', { files }); // Pass the files data to the template
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.get('/addfile',function(req, res, next) {
