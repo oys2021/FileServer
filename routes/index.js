@@ -165,39 +165,33 @@ router.get('/send-email/:fileId',async(req, res, next)=>{
   res.render('sendEmail',{ file: file });
 });
 
-
 router.post('/send-email/:fileId', async (req, res) => {
   try {
     const { fileId } = req.params;
-    const { senderEmail,receiverEmail } = req.body;
+    const { send, receive } = req.body;
+    console.log(send);
+    console.log(receive);
     const file = await FileModel.findById(fileId);
   
     if (file) {
       console.log("File recognized");
-      
-      const mailOptions = {
-        from: 'yawsarfo2019@gmail.com',
-        to: 'opokuyawsarfo3@gmail.com',
-        subject: 'Subject of the email',
-        text: 'Body of the email',
-        attachments: [
-          {
-            filename: file.fileName,
-            path: `uploads/${file.fileName}`,
-          },
-        ],
-      };
 
       // Send a password reset email to the user
-    transporter.sendMail({
-      from: senderEmail,
-      to: receiverEmail,
-      subject: 'Subject of Email',
-      html: `
-        <h1>Your attached file</h1>
-        <p>uploads/${file.fileName}</p>
-      `,
-    })
+      transporter.sendMail({
+        from: `${send}`,
+        to: `${receive}`, // Updated variable name
+        subject: 'Subject of Email',
+        html: `
+          <h1>Your attached file</h1>
+          <p>uploads/${file.fileName}</p>
+        `,
+        attachments: [
+          {
+            filename: file.fileName, // Provide the file name
+            path: `uploads/${file.fileName}` // Provide the path to the file
+          }
+        ]
+      })
       .then((results) => {
         console.log("Email sent successfully");
       })
@@ -206,11 +200,12 @@ router.post('/send-email/:fileId', async (req, res) => {
       });
       
       
-   // Increment the emailCount for the file
-   file.emailCount += 1;
-   await file.save();
+      // Increment the emailCount for the file
+      file.emailCount += 1;
+      await file.save();
 
-  }} catch (error) {
+    }
+  } catch (error) {
     console.error(error);
     res.status(500).send("Internal server error.");
   }

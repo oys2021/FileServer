@@ -128,7 +128,7 @@
                               <p><%= file.description%></p>
                               <p><%= file.fileType%></p>
                               <div class="file-icons">
-                                  <a href="#"><i class="fas fa-download"></i></a>
+                                <a href="/download/<%= file._id%>"><i class="fas fa-download"></i></a>
                                   <a href="/preview/<%= file._id%>/"><i class="fas fa-eye"></i></a>
                                    <a href="/send-email/<%= file._id%>"><i class="fas fa-envelope"></i></a>
                                   
