@@ -9,37 +9,31 @@
       <div class="row">        
           <div class="col-md-1"></div>
           <div class="col-md-9">
-
               <div class="table-responsive shadow">
                   <table class="table table-striped">
                       <tr>
                           <th>File Title</th>
                           <th>Description </th>
-                          <th>Edit</th>
-                          <th>Delete</th>
+                          <th>FileType</th>
+                          
                       </tr>
-                      
-                 
-                          <tr>
-                              <td>title </td>
-                              <td>description</td>
+                      <% if (files.length > 0) { %>
+                        <ul>
+                          <% files.forEach((file) => { %>
+
+                            <tr>
+                              <td><%= file.title %></td>
+                              <td><%= file.description%></td>
                               <td>
-                                <a href="#"><button class="btn btn-info btn-sm" data-toggle="modal" data-target="#modelId1"><img src="\img\icons8_Edit_Production_Order_16.png" alt="" class="img-fluid">Edit</button></a>  
-                            
+                                <%= file.fileType%>
                               </td>
-                              <td>
-                                <form action="/admin/delete/" method="POST">
-                                  <button type="submit" class="btn btn-danger btn-sm"><img src="\img\icons8_trash_16.png" alt="" class="img-fluid">Delete</button>
-                                </form>
-                              </td>
+                              
                           </tr>
-                      
-                        <!-- <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                          </button>
-                          <strong>No Doctors Available Yet :)</strong> 
-                        </div> -->
+                          <% }); %>
+                        </ul>
+                      <% } else { %>
+                        <p>No files found.</p>
+                      <% } %>
                   </table>
               </div>
           </div>

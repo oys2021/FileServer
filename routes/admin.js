@@ -30,8 +30,14 @@ router.get('/main', async function(req, res, next) {
   }
 });
 
-router.get('/addfile',function(req, res, next) {
-  res.render('admin/addFile');
+router.get('/addfile',async(req, res, next)=>{
+  try {
+    const files = await FileModel.find()
+    res.render('admin/addFile', { files }); // Render the 'files' view and pass the files data
+  } catch (error) {
+    console.error('Error retrieving files:', error);
+    res.status(500).json({ error: 'Failed to retrieve files' });
+  }
 });
 
 router.post('/upload', upload.single('file'), async (req, res) => {

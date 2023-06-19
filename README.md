@@ -8,6 +8,7 @@ This is a file server application that allows users to upload, download, search,
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Configuration](#configuration)
+- [Routes](#routes)
 - [Usage](#usage)
 - [Contributing](#contributing)
 - [License](#license)
@@ -55,6 +56,18 @@ npm install
 
 ## Configuration
 1. Create a .env file in the project root directory.
+
+## Routes
+There are 3 main routes
+1.home ('/')
+
+2.admin ('/admin') 
+-'admin/addfile': for uploading files by admin
+-'admin/main': for admn to view number of downloads and number of email sent
+3.users ('/users')
+-'user/signup' to register users
+-'user/login'  to login users
+where there are further routes for each.
 
 ## Usage
 Start the application:
