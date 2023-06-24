@@ -123,7 +123,6 @@ router.get('/download/:fileId', async(req, res) => {
 
 
 
-
 // Route to retrieve and preview a file by ID
 router.get('/preview/:fileId', (req, res) => {
   const fileId = req.params.fileId;
@@ -135,13 +134,28 @@ router.get('/preview/:fileId', (req, res) => {
         return res.status(404).json({ error: 'File not found' });
       }
 
-      const filePath = `uploads/${file.fileName}`;
+      const filePath = `${__dirname}\\uploads\\${file.fileName}`;
+
+
+      // Check if the file exists
+      if (!fs.existsSync(filePath)) {
+        console.log('File not found:', filePath); // Debugging statement
+        return res.status(404).json({ error: 'File not found' });
+      }
+
+      console.log('File path:', filePath); // Debugging statement
 
       // Read the file using fs.createReadStream
       const fileStream = fs.createReadStream(filePath);
 
       // Set the appropriate content type header based on file type
       res.setHeader('Content-Type', file.fileType);
+
+      // Handle file stream errors
+      fileStream.on('error', (error) => {
+        console.error('Error reading file:', error);
+        res.status(500).json({ error: 'Failed to read file' });
+      });
 
       // Pipe the file stream to the response
       fileStream.pipe(res);
@@ -152,18 +166,12 @@ router.get('/preview/:fileId', (req, res) => {
     });
 });
 
-router.get('/send-email/:fileId',async(req, res, next)=>{
-  const { fileId } = req.params;
-  const file = await FileModel.findById(fileId);
 
-  if (file) {
-    console.log("File recognized");
-  } else {
-    console.log("File is not recognized found");
-  }
 
-  res.render('sendEmail',{ file: file });
-});
+
+
+
+
 
 router.post('/send-email/:fileId', async (req, res) => {
   try {
