@@ -97,7 +97,10 @@ router.get('/download/:fileId', async(req, res) => {
         return res.status(404).json({ error: 'File not found' });
       }
 
-      const filePath = `uploads/${file.fileName}`;
+      // Assuming `file.fileName` contains the name of the uploaded file
+const fileName = file.fileName;
+const filePath = path.join(__dirname, '..', 'public', 'uploads', fileName);
+
 
       // Increment the download count in your database
       file.downloadCount += 1;
@@ -134,16 +137,17 @@ router.get('/preview/:fileId', (req, res) => {
         return res.status(404).json({ error: 'File not found' });
       }
 
-      const filePath = `${__dirname}\\uploads\\${file.fileName}`;
+      const fileName = file.fileName;
+      const filePath = path.join(__dirname, '..', 'public', 'uploads', fileName);
 
+
+      console.log('File path:', filePath); // Debugging statement
 
       // Check if the file exists
       if (!fs.existsSync(filePath)) {
         console.log('File not found:', filePath); // Debugging statement
-        return res.status(404).json({ error: 'File not found' });
+        return res.status(404).json({ error: 'File does not exist' });
       }
-
-      console.log('File path:', filePath); // Debugging statement
 
       // Read the file using fs.createReadStream
       const fileStream = fs.createReadStream(filePath);
@@ -172,7 +176,6 @@ router.get('/preview/:fileId', (req, res) => {
 
 
 
-
 router.post('/send-email/:fileId', async (req, res) => {
   try {
     const { fileId } = req.params;
@@ -180,6 +183,9 @@ router.post('/send-email/:fileId', async (req, res) => {
     console.log(send);
     console.log(receive);
     const file = await FileModel.findById(fileId);
+const fileName = file.fileName;
+const filePath = path.join(__dirname, '..', 'public', 'uploads', fileName);
+
   
     if (file) {
       console.log("File recognized");
@@ -191,12 +197,12 @@ router.post('/send-email/:fileId', async (req, res) => {
         subject: 'Subject of Email',
         html: `
           <h1>Your attached file</h1>
-          <p>uploads/${file.fileName}</p>
+          <p>filepath</p>
         `,
         attachments: [
           {
             filename: file.fileName, // Provide the file name
-            path: `uploads/${file.fileName}` // Provide the path to the file
+            path:filePath
           }
         ]
       })
