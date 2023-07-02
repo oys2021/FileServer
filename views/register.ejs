@@ -7,63 +7,55 @@
     <link rel="stylesheet" href="/bootstrap-5/css/bootstrap.min.css">
     <link rel="stylesheet" href="/bootstrap-5/css/styles.css">
     <style>
-        .success-message {
-          background-color: #dff0d8;
-          color: #3c763d;
-          padding: 10px;
-          border-radius: 4px;
-        }
-        
-        .error-message {
-          background-color: #f2dede;
-          color: #a94442;
-          padding: 10px;
-          border-radius: 4px;
-        }
+        body {
+  background-color: #f2f2f2;
+}
+
+.container {
+  max-width: 400px;
+  margin: 100px auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.form-group label {
+  font-weight: bold;
+}
+
+.btn-primary {
+  width: 100%;
+}
+
       </style>
 </head>
 <body>
-    <div class="container text-center mt-5">
-        <a href="/"><img src="img/logo.png" alt=""></a>
-        <div class="row">
-            <div class="col-md-3"></div>
-            <div class="col-md-6 mt-4">
-                <div class="card register">
-                    <div class="card-header text-white">
-                        <h4>Register</h4>
-                    </div>
-                    <div class="card-body">
-                        <%- include('./partials/messages.ejs') %> 
-                        <form id="myForm" action="/users/signup" method="POST">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <input type="email" name="email" class="form-control" placeholder="Email e.g: name@gmail.com" required>
-                                    </div><br>
-                                </div>                                
-                                                          
-                            </div><br>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <input type="password" name="password" class="form-control" placeholder=" Password" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <input type="password" name="password1" class="form-control" placeholder="Confirm Password" required>
-                                    </div>
-                                </div>
-                            </div><br>
-                            <button type="submit" class="btn btn-block btn1">Register</button>
-                            <p class="text-center mt-3">Already have an Account? <a href="/users/login">Log-In</a></p>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3"></div>
-        </div>
-    </div>
+    
+  <div class="container">
+    <h1>Signup</h1>
+    <form method="POST" action="/users/signup">
+      <div class="form-group">
+        <label for="name">Name:</label>
+        <input class="form-control" type="text" id="name" name="name" placeholder="Enter your name" required>
+      </div>
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input class="form-control" type="email" id="email" name="email" placeholder="Enter your email" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input class="form-control" type="password" id="password" name="password" placeholder="Enter your password" required>
+      </div>
+      <br><br>
+      <button class="btn btn-primary" type="submit">Signup</button>
+    </form>
+  </div>
     
 
     <script src="/bootstrap-5/js/Jquery.js"></script>

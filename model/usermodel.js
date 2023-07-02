@@ -1,24 +1,28 @@
-var mongoose = require('mongoose')
-var Schema= mongoose.Schema
-var bcrypt=require('bcrypt')
-const jwt = require("jsonwebtoken");
-var UserSchema= new Schema({
+const mongoose = require('mongoose');
 
-email:{
-    type:String,
-    unique:true
-},
-password:{
-    type:String
-},
-resetToken :{
-	type:String,
-}
+const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  password: {
+    type: String,
+    required: true,
+  },
+  resetPasswordToken: {
+    type: String,
+    default: null,
+  },
+  resetPasswordExpires: {
+    type: Date,
+    default: null,
+  },
+});
 
-})
-const refreshTokens=[];
-
-var User=mongoose.model('user',UserSchema)
-module.exports=User
-
-
+const User=mongoose.model('User', userSchema);
+module.exports = User

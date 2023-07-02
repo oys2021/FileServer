@@ -7,6 +7,11 @@ var mongoose=require('mongoose')
 const flash = require('connect-flash');
 const session = require('express-session');
 const nodemailer = require('nodemailer');
+const bcrypt = require('bcryptjs');
+const passport = require('passport');
+
+
+
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -15,6 +20,9 @@ require('dotenv').config();
 
 var app = express();
 // Mongoose setup
+
+// Passport Config
+require('./config/passport')(passport);
 
 // Fix mongoose error
 mongoose.set('strictQuery', true);
@@ -29,6 +37,33 @@ console.log(err)
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
+
+
+// Express session
+app.use(
+  session({
+      secret: 'secret',
+      resave: true,
+      saveUninitialized: true
+  })
+);
+
+// Passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Connect flash
+app.use(flash());
+
+// Global variables
+app.use(function (req, res, next) {
+  res.locals.success_msg = req.flash('success_msg');
+  res.locals.error_msg = req.flash('error_msg');
+  res.locals.error = req.flash('error');
+  next();
+});
+
+
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -39,23 +74,10 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/admin', adminRouter);
 
-//Express Session
-app.use(session({
-  secret: "secret",
-  resave: true,
-  saveUninitialized: true
-}));
 
-// connect to flash
-//Connect Flash
-app.use(flash())
-//Global Variable
-app.use((req, res, next)=>{
-  res.locals.success_msg = req.flash('success_msg')
-  res.locals.error_msg = req.flash('error_msg')
-  res.locals.error = req.flash('error')
-  next()
-});
+
+
+
 // Set up Nodemailer transporter
 const transporter = nodemailer.createTransport({
   service: 'Gmail',

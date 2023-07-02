@@ -6,7 +6,9 @@ var User=require('../model/usermodel')
 var mongoose=require('mongoose')
 const nodemailer = require('nodemailer');
 const crypto = require("crypto");
-
+const passport = require('passport');
+const flash = require('connect-flash');
+router.use(flash());
 // Set up Nodemailer transporter
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -29,235 +31,231 @@ router.get('/', function(req, res, next) {
   res.send('respond with a resource');
 });
 
+// Render login page
+router.get('/login', (req, res) => {
+  const errorMessage = req.session.errorMessage; // Retrieve error message from session
+  delete req.session.errorMessage; // Remove error message from session
+  res.render('login', { errorMessage });
+});
 
-router.get('/signup', function(req, res, next) {
+
+
+// Login
+router.post('/login', (req, res, next) => {
+  passport.authenticate('local', (err, user, info) => {
+    if (err) {
+      return next(err);
+    }
+    if (!user) {
+      req.session.errorMessage = 'Incorrect email or password'; // Store error message in session
+      return res.redirect('/users/login');
+    }
+    req.logIn(user, function(err) {
+      if (err) {
+        return next(err);
+      }
+      return res.redirect('/users/dashboard');
+    });
+  })(req, res, next);
+});
+
+
+
+
+// Signup route
+router.get('/signup', (req, res) => {
   res.render('register');
 });
 
-router.get('/login', function(req, res, next) {
-  res.render('login');
+// Create new user
+router.post('/signup', (req, res) => {
+  const { name, email, password } = req.body;
+  let errors = [];
+
+  // Validate required fields
+  if (!name || !email || !password) {
+    errors.push({ message: 'Please fill in all fields' });
+  }
+
+  // Validate password length
+  if (password.length < 6) {
+    errors.push({ message: 'Password should be at least 6 characters' });
+  }
+
+  if (errors.length > 0) {
+    res.send('Signup page with errors');
+  } else {
+    // Check if user already exists
+    User.findOne({ email: email }).then((user) => {
+      if (user) {
+        res.send('User already exists');
+      } else {
+        // Create new user
+        const newUser = new User({
+          name,
+          email,
+          password,
+        });
+
+        // Hash password and save user
+        bcrypt.genSalt(10, (err, salt) => {
+          bcrypt.hash(newUser.password, salt, (err, hash) => {
+            if (err) throw err;
+            newUser.password = hash;
+            newUser
+              .save()
+              .then((user) => {
+                res.send('User registered successfully');
+              })
+              .catch((err) => console.log(err));
+          });
+        });
+      }
+    });
+  }
+});
+
+// Logout route
+router.get('/logout', (req, res) => {
+  req.logout();
+  res.send('Logged out');
+});
+
+// Dashboard route (protected)
+router.get('/dashboard',(req, res) => {
+  if (req.isAuthenticated()) {
+    res.send('Dashboard page');
+  } else {
+    return res.redirect('/users/login');
+  }
+});
+
+// GET request to display the password reset form
+router.get('/reset', (req, res) => {
+  const errorMessage = req.session.errorMessage; // Retrieve error message from session
+  const successMessage = req.session.successMessage; // Retrieve error message from session
+  delete req.session.errorMessage; // Remove error message from session
+  delete req.session.successMessage;
+  res.render('reset',{errorMessage,successMessage});
 });
 
 
-router.post('/signup',async (req,res,next)=>{
-  const { email ,password, password1 } = req.body;
+// POST request to handle the password reset form submission
+router.post('/reset', (req, res, next) => {
+  async.waterfall([
+    // Generate a unique token for password reset
+    (done) => {
+      crypto.randomBytes(20, (err, buf) => {
+        const token = buf.toString('hex');
+        done(err, token);
+      });
+    },
+    // Find the user with the provided email
+    (token, done) => {
+      const user = User.findOne({ email: req.body.email });
+      if (!user) {
+        req.session.errorMessage = 'No user with this email'; // Store error message in session
+        return res.redirect('/users/reset');
+      }
 
-  
-  if (password !== password1) {
-    res
-      .status(409)
-      .send({ message: 'Password dont match' });
-    
-    return;
-  }
-   // Check if the email already exists
-   const existingUser = await User.findOne({ email });
+      // Save the reset token and expiry time to the user's document
+      user.resetPasswordToken = token;
+      user.resetPasswordExpires = Date.now() + 3600000; // Token valid for 1 hour
 
-   if (existingUser) {
-     return res.status(400).send("Email already exists");
-   }
+      user.save((err) => {
+        done(err, token, user);
+      });
+    },
+    // Send the password reset email with the reset link
+    (token, user, done) => {
+      const mailOptions = {
+        to: user.email,
+        from: user.email,
+        subject: 'Password Reset',
+        text: `You are receiving this email because you (or someone else) have requested to reset the password for your account.\n\n
+          Please click on the following link, or paste it into your browser to complete the process:\n\n
+          ${req.protocol}://${req.headers.host}/users/reset/${token}\n\n
+          If you did not request this, please ignore this email and your password will remain unchanged.\n`
+      };
 
-  // check if user already exists
-  const user = await User.findOne({ email: email });
-  
-  if (user) {
-    res.status(409)
-      .send({ message: 'User with given email already exists!' });
-    
-    return;
-  }
-
-  const salt = await bcrypt.genSalt();
-  const hashPassword = await bcrypt.hash(password, salt);
-
-  
-  //Generate a token
-
-  const token = jwt.sign({ email: email }, process.env.TokenSecret, {
+      // Replace the transport and send the email using a mailer of your choice (e.g., Nodemailer)
+      // Example using Nodemailer:
+      transporter.sendMail(mailOptions, (err) => {
+        req.flash('info', 'An email has been sent with instructions to reset your password.');
+        done(err);
+      });
+    }
+  ], (err) => {
+    if (err) return next(err);
+    res.redirect('/users/reset');
   });
- 
-const newuser= await new User({ ...req.body, password:hashPassword, resetToken:token}).save();
-
-
-  // Send the JWT as a cookie
-
-  if (!newuser) {
-    return res.status(500).send({ message: 'newuser not created' });
-  }
-
-  
-  res.cookie('token', token, { httpOnly: true });
-  
- // Render the registration success page
- return res.redirect(`../home`);
 });
 
-router.post("/login", async (req, res) => {
-  try {
-    // Validate the submitted data
-    const { email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).send("Please enter all required fields");
-    }
-
-    // Find the user by email
-    const user = await User.findOne({ email });
-    console.log("User:", user);
-
-    // Check if the user exists
+// GET request to display the password reset form with the token
+router.get('/reset/:token', (req, res) => {
+  const errorMessage = req.session.errorMessage; // Retrieve error message from session
+  const successMessage = req.session.successMessage; // Retrieve error message from session
+  delete req.session.errorMessage; // Remove error message from session
+  delete req.session.successMessage;
+  User.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, (err, user) => {
     if (!user) {
-      return res.status(401).send("Invalid email or password");
+      req.session.errorMessage = 'No user with this email';
+      return res.redirect('/users/reset');
     }
-
-    // Compare the submitted password to the hashed password in the database
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    // If the passwords don't match, return an error
-    if (!isPasswordValid) {
-      return res.status(401).send("Invalid email or password");
-    }
-
-    // Retrieve the authentication token from the database
-    const token = user.resetToken;
-    console.log("User Token:", token);
-
-    // Set the token as a cookie
-    res.cookie("token", token, { httpOnly: true });
-
-    return  res.redirect(`../home`);
-  } catch (error) {
-    console.log(error);
-    return res.status(500).send("Internal server error");
-  }
+    res.render('resetToken', { token: req.params.token,successMessage,errorMessage });
+  });
 });
 
-router.get('/forgot', async (req, res) =>{
-  res.render("forgot")
-})
-
-router.post('/forgot', async (req, res) => {
-  try {
-    const { email } = req.body;
-    console.log("Email:", email); // Check the value of the email variable
-
-    const user = await User.findOne({ email });
-    console.log("User:", user); // Check if user is found
-
-    if (!user) {
-      console.log("User not found for email:", email); // Debug user retrieval
-      return res.status(401).json({ message: 'User not found' });
-    }
-
-    // Generate a random reset token
-    var Token = crypto.randomBytes(32).toString("hex");
-    console.log("Token:", Token); // Check the generated token
-
-    res.cookie('Token', Token, { httpOnly: true });
-
-    if (!Token) {
-      console.log("Token is empty or undefined"); // Debug token generation
-      return res.status(401).json({ message: 'ResetToken failed to be formed' });
-    }
-
-    // Send a password reset email to the user
-    transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: 'Password reset request',
-      html: `
-        <h1>Reset Your Password</h1>
-        <p>You recently requested to reset your password for your account. Use the link below to reset it:</p>
-        <p>${process.env.Client_URL}/users/${Token}/reset-password"</p>
-        <p>If you did not request a password reset, please ignore this email or reply to let us know. This password reset link is valid for one hour.</p>
-      `,
-    })
-      .then((results) => {
-        console.log("Email sent successfully");
-      })
-      .catch((err) => {
-        console.log("Email sending failed:", err);
-      });
-    // Update one document
-    const result = await User.findByIdAndUpdate(
-      user._id,
-      { $set: { resetToken: Token } },
-      { new: true }
-    );
-
-    console.log("Update result:", result); // Log the update result
-
-    if (result.nModified === 1) {
-      console.log("Document updated successfully");
-    } else {
-      console.log("Document not updated");
-    }
-
-    // Debugging the user document
-    console.log("User document after update:", user);
-
-  } catch (error) {
-    console.log("Error:", error);
-  }
-
-});
-
-
-  
-router.get('/:restlink/reset-password', async (req, res) => {
-  try {
-    const resetToken = req.params.restlink;
-    console.log("Reset Token:", resetToken); // Check the value of the resetToken parameter
-
-    const user = await User.findOne({ resetToken });
-    console.log("User:", user); // Check if user is found
-
-    if (!user) {
-      console.log("User not found");
-      return res.status(404).send('User not found');
-    }
-
-    res.render("recover_password", { user });
-  } catch (error) {
-    console.log("Error:", error);
-    res.status(500).send('Internal Server Error');
-  }
-});
-
-
-      router.get('/forgot', async (req, res) =>{
-        res.render("forgot")
-      })
-
-      router.post('/:resetlink/reset-password', async function(req, res, next) {
-        try {
-          const { password } = req.body;
-          console.log("New Password:", password); // Check the value of the new password
-      
-          const resetToken = req.params.resetlink;
-          console.log("Reset Token:", resetToken); // Check the value of the resetToken parameter
-      
-          const user = await User.findOne({ resetToken });
-          console.log("User:", user); // Check if user is found
-      
-          if (!user) {
-            console.log("Invalid reset token");
-            return res.status(401).send("Invalid reset token");
-          }
-      
-          const hashedPassword = await bcrypt.hash(password, 10);
-          console.log("Hashed Password:", hashedPassword); // Check the hashed password
-      
-          // Update the user's password and resetToken
-          user.password = hashedPassword;
-          await user.save();
-      
-          return res.status(200).send("Password updated");
-        } catch (error) {
-          console.log("Error:", error);
-          return res.status(500).send("Internal server error");
+// POST request to handle the password reset form submission with the token
+router.post('/reset/:token', (req, res) => {
+  async.waterfall([
+    // Find the user with the provided reset token
+    (done) => {
+      User.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, (err, user) => {
+        if (!user) {
+          req.session.errorMessage =  'Password reset token is invalid or has expired';
+          return res.redirect('back');
         }
+
+        // Set the new password and clear the reset token and expiry time
+        user.password = req.body.password;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+
+        user.save((err) => {
+          req.logIn(user, (err) => {
+            done(err, user);
+          });
+        });
       });
+    },
+    // Send the password reset confirmation email
+    (user, done) => {
+      const mailOptions = {
+        to: user.email,
+        from: user.email,
+        subject: 'Your password has been changed',
+        text: 'Hello,\n\n' +
+          'This is a confirmation that the password for your account has been changed.\n'
+      };
+
+      // Replace the transport and send the email using a mailer of your choice (e.g., Nodemailer)
+      // Example using Nodemailer:
+      transporter.sendMail(mailOptions, (err) => {
+        req.session.successMessage = 'Password reset email sent successfully';
+// Store error message in session
+       
+        done(err);
+      });
+    }
+  ], (err) => {
+    res.redirect('/users/dashboard');
+  });
+});
+
+
+  
       
       
       
