@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
-const passportLocalMongoose = require('passport-local-mongoose');
+
+// Define User schema
+// Define User schema
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -22,6 +24,32 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
+  isVerified: {
+    type: Boolean,
+    default: false,
+  },
 });
-const User=mongoose.model('User', userSchema);
-module.exports = User
+
+// Define VerificationToken schema
+const verificationTokenSchema = new mongoose.Schema({
+  _userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'User',
+  },
+  token: {
+    type: String,
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+    expires: 24 * 60 * 60, // Token will expire after 24 hours
+  },
+});
+
+const User = mongoose.model('User', userSchema);
+
+const VerificationToken = mongoose.model('VerificationToken', verificationTokenSchema);
+
+module.exports = { User, VerificationToken };

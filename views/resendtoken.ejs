@@ -39,10 +39,12 @@
 </head>
 <body>
   <div class="container">
-   
-    <p class="message">Account Activation</p>
+    <h1>Email Verified</h1>
+    <p class="message">Email verification Expire</p>
     <div class="paragraphs">
-      <p class="message">An email has been sent to your mail</p>
+      <p>Your verification link may have expired. Please click the link below to resend to verify your email</p>
+      <p><a href="/users/resend/<%= user._id %>">Resend</a></p>
+
     </div>
   </div>
 </body>

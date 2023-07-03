@@ -174,6 +174,21 @@ router.get('/preview/:fileId', (req, res) => {
 
 
 
+router.get('/send-email/:fileId', async (req, res) => {
+  try {
+    const { fileId } = req.params;
+    const file = await FileModel.findById(fileId);
+
+    if (file) {
+      res.render('sendEmail', { file });
+    } else {
+      res.status(404).send('File not found');
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal server error.');
+  }
+});
 
 
 router.post('/send-email/:fileId', async (req, res) => {

@@ -54,7 +54,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 
     await file.save();
 
-    res.status(200).json({ fileId: file._id });
+    return res.redirect('main')
   } catch (error) {
     console.error('Error uploading file:', error);
     res.status(500).json({ error: 'Failed to upload file' });
