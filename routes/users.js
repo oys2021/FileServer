@@ -10,22 +10,6 @@ const passport = require('passport');
 const flash = require('connect-flash');
 router.use(flash());
 // Set up Nodemailer transporter
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true,
-  auth: {
-    user:'yawsarfo2019@gmail.com',
-    pass:'etqxisaxfxkhxlte',
-  },
-  tls: {
-    rejectUnauthorized: false
-  },
-  connectionTimeout: 60 * 1000, // 1 minute
-  greetingTimeout: 60 * 1000, // 1 minute
-  socketTimeout: 5 * 60 * 1000 // 5 minutes
-});
 /* GET users listing. */
 router.get('/', function(req, res, next) {
   res.send('respond with a resource');
@@ -54,7 +38,7 @@ router.post('/login', (req, res, next) => {
       if (err) {
         return next(err);
       }
-      return res.redirect('/users/dashboard');
+      return res.redirect('../home');
     });
   })(req, res, next);
 });
@@ -64,7 +48,9 @@ router.post('/login', (req, res, next) => {
 
 // Signup route
 router.get('/signup', (req, res) => {
-  res.render('register');
+  const errorMessage = req.session.errorMessage; // Retrieve error message from session
+  delete req.session.errorMessage;
+  res.render('register',{errorMessage});
 });
 
 // Create new user
@@ -74,12 +60,12 @@ router.post('/signup', (req, res) => {
 
   // Validate required fields
   if (!name || !email || !password) {
-    errors.push({ message: 'Please fill in all fields' });
+    req.session.errorMessage = 'please fill in all parts';
   }
 
   // Validate password length
   if (password.length < 6) {
-    errors.push({ message: 'Password should be at least 6 characters' });
+    req.session.errorMessage = 'password should be at least 6';
   }
 
   if (errors.length > 0) {
@@ -88,7 +74,7 @@ router.post('/signup', (req, res) => {
     // Check if user already exists
     User.findOne({ email: email }).then((user) => {
       if (user) {
-        res.send('User already exists');
+        req.session.errorMessage = 'user already exist';
       } else {
         // Create new user
         const newUser = new User({
@@ -105,9 +91,9 @@ router.post('/signup', (req, res) => {
             newUser
               .save()
               .then((user) => {
-                res.send('User registered successfully');
+                return res.redirect('../home');
               })
-              .catch((err) => console.log(err));
+              .catch((err) => req.session.errorMessage = 'internal server error');
           });
         });
       }
@@ -115,10 +101,17 @@ router.post('/signup', (req, res) => {
   }
 });
 
-// Logout route
 router.get('/logout', (req, res) => {
-  req.logout();
-  res.send('Logged out');
+  req.logout(function(err) {
+    if (err) {
+      console.error(err);
+      // Handle any error that occurred during logout
+      res.send('Error logging out');
+    } else {
+      // User has been logged out successfully
+      return res.redirect('/users/logout-success');
+    }
+  });
 });
 
 // Dashboard route (protected)
@@ -130,134 +123,134 @@ router.get('/dashboard',(req, res) => {
   }
 });
 
-// GET request to display the password reset form
-router.get('/reset', (req, res) => {
-  const errorMessage = req.session.errorMessage; // Retrieve error message from session
-  const successMessage = req.session.successMessage; // Retrieve error message from session
-  delete req.session.errorMessage; // Remove error message from session
-  delete req.session.successMessage;
-  res.render('reset',{errorMessage,successMessage});
+
+// Route to initiate password reset
+router.get('/forgot-password', (req, res) => {
+  res.render('forgot-password'); // Render the password reset form
 });
 
 
-// POST request to handle the password reset form submission
-router.post('/reset', (req, res, next) => {
-  async.waterfall([
-    // Generate a unique token for password reset
-    (done) => {
-      crypto.randomBytes(20, (err, buf) => {
-        const token = buf.toString('hex');
-        done(err, token);
-      });
-    },
-    // Find the user with the provided email
-    (token, done) => {
-      const user = User.findOne({ email: req.body.email });
-      if (!user) {
-        req.session.errorMessage = 'No user with this email'; // Store error message in session
-        return res.redirect('/users/reset');
-      }
+router.post('/forgot-password', async (req, res, next) => {
+  try {
+    // Generate a unique reset token
+    const token = crypto.randomBytes(20).toString('hex');
 
-      // Save the reset token and expiry time to the user's document
-      user.resetPasswordToken = token;
-      user.resetPasswordExpires = Date.now() + 3600000; // Token valid for 1 hour
-
-      user.save((err) => {
-        done(err, token, user);
-      });
-    },
-    // Send the password reset email with the reset link
-    (token, user, done) => {
-      const mailOptions = {
-        to: user.email,
-        from: user.email,
-        subject: 'Password Reset',
-        text: `You are receiving this email because you (or someone else) have requested to reset the password for your account.\n\n
-          Please click on the following link, or paste it into your browser to complete the process:\n\n
-          ${req.protocol}://${req.headers.host}/users/reset/${token}\n\n
-          If you did not request this, please ignore this email and your password will remain unchanged.\n`
-      };
-
-      // Replace the transport and send the email using a mailer of your choice (e.g., Nodemailer)
-      // Example using Nodemailer:
-      transporter.sendMail(mailOptions, (err) => {
-        req.flash('info', 'An email has been sent with instructions to reset your password.');
-        done(err);
-      });
-    }
-  ], (err) => {
-    if (err) return next(err);
-    res.redirect('/users/reset');
-  });
-});
-
-
-// GET request to display the password reset form with the token
-router.get('/reset/:token', (req, res) => {
-  const errorMessage = req.session.errorMessage; // Retrieve error message from session
-  const successMessage = req.session.successMessage; // Retrieve error message from session
-  delete req.session.errorMessage; // Remove error message from session
-  delete req.session.successMessage;
-  User.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, (err, user) => {
+    // Find the user by email
+    const user = await User.findOne({ email: req.body.email });
     if (!user) {
-      req.session.errorMessage = 'No user with this email';
-      return res.redirect('/users/reset');
+      console.error('User not found');
+      return res.redirect('/users/forgot-password');
     }
-    res.render('resetToken', { token: req.params.token,successMessage,errorMessage });
-  });
-});
 
-// POST request to handle the password reset form submission with the token
-router.post('/reset/:token', (req, res) => {
-  async.waterfall([
-    // Find the user with the provided reset token
-    (done) => {
-      User.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, (err, user) => {
-        if (!user) {
-          req.session.errorMessage =  'Password reset token is invalid or has expired';
-          return res.redirect('back');
-        }
+    // Set the reset token and expiration time
+    user.resetPasswordToken = token;
+    user.resetPasswordExpires = Date.now() + 3600000; // Token valid for 1 hour
 
-        // Set the new password and clear the reset token and expiry time
-        user.password = req.body.password;
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpires = undefined;
+    // Save the user
+    await user.save();
 
-        user.save((err) => {
-          req.logIn(user, (err) => {
-            done(err, user);
-          });
-        });
-      });
-    },
-    // Send the password reset confirmation email
-    (user, done) => {
-      const mailOptions = {
-        to: user.email,
-        from: user.email,
-        subject: 'Your password has been changed',
-        text: 'Hello,\n\n' +
-          'This is a confirmation that the password for your account has been changed.\n'
-      };
+    // Create the email transport configuration
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: {
+        user: 'yawsarfo2019@gmail.com',
+        pass: 'etqxisaxfxkhxlte',
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+      connectionTimeout: 60 * 1000, // 1 minute
+      greetingTimeout: 60 * 1000, // 1 minute
+      socketTimeout: 5 * 60 * 1000, // 5 minutes
+    });
 
-      // Replace the transport and send the email using a mailer of your choice (e.g., Nodemailer)
-      // Example using Nodemailer:
-      transporter.sendMail(mailOptions, (err) => {
-        req.session.successMessage = 'Password reset email sent successfully';
-// Store error message in session
-       
-        done(err);
-      });
-    }
-  ], (err) => {
-    res.redirect('/users/dashboard');
-  });
+    // Create the email message
+    const mailOptions = {
+      from: user.email,
+      to: user.email,
+      subject: 'Password Reset',
+      text: `To reset your password, please click on the following link: http://${req.headers.host}/users/reset-password/${token}`,
+    };
+
+    // Send the email
+    await transporter.sendMail(mailOptions);
+  } catch (err) {
+    console.log(err);
+    // res.redirect('/users/forgot-password');
+  }
 });
 
 
+// Route to render the password reset page
+router.get('/reset-password/:token', async (req, res) => {
+  try {
+    const user = await User.findOne({
+      resetPasswordToken: req.params.token,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
   
+    if (!user) {
+      console.error('User not found');
+      return res.redirect('/users/forgot-password');
+    }
+  
+    // Render the password reset form with the token
+    res.render('reset-password', { token: req.params.token });
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+// Route to process the password reset
+router.post('/reset-password/:token', async (req, res) => {
+  try {
+    const user = await User.findOne({
+      resetPasswordToken: req.params.token,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
+  
+    if (!user) {
+      console.error('User not found');
+      return res.redirect('/users/forgot-password');
+    }
+  
+    // Set the new password
+    user.password = req.body.password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+  
+    // Hash the updated password
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(user.password, salt);
+  
+    await user.updateOne({
+      $set: {
+        password: user.password,
+        resetPasswordToken: undefined,
+        resetPasswordExpires: undefined
+      }
+    });
+  
+    // Redirect the user to a success page
+    res.redirect('/users/password-reset-success');
+  } catch (err) {
+    console.error(err);
+    res.redirect(`/users/reset-password/${req.params.token}`);
+  }
+});
+
       
-      
+// Route for password reset success
+router.get('/password-reset-success', (req, res) => {
+  res.render('password-reset-success'); // Render the password reset success page
+});
+// Route for password reset success
+router.get('/logout-success', (req, res) => {
+  res.render('logout'); // Render the password reset success page
+});
       
 
 
